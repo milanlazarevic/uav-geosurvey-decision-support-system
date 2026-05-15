@@ -1,0 +1,44 @@
+//package rules.level1;
+//
+//import com.ftn.sbnz.model.events.BatteryReading;
+//import com.ftn.sbnz.model.facts.FlightFact;
+//import com.ftn.sbnz.model.facts.FlightWarning;
+//
+//// CRITICAL: Battery below 10%
+//rule "Battery Critical"
+//    salience 100
+//    when
+//        BatteryReading(level < 10)
+//        not(FlightFact(value == "BATTERY_CRITICAL"))
+//    then
+//        insert(new FlightFact("BATTERY_CRITICAL"));
+//        insert(new FlightWarning("Baterija ispod 10%"));
+//        System.out.println("[RULE] Battery Critical: < 10%");
+//end
+//
+//// LOW: Battery below 20% (but not critical)
+//rule "Battery Low"
+//    salience 90
+//    when
+//        BatteryReading(level >= 10, level < 20)
+//        not(FlightFact(value == "BATTERY_CRITICAL"))
+//        not(FlightFact(value == "BATTERY_LOW"))
+//    then
+//        insert(new FlightFact("BATTERY_LOW"));
+//        insert(new FlightWarning("Baterija ispod 20%"));
+//        System.out.println("[RULE] Battery Low: < 20%");
+//end
+//
+//// WARNING: Battery below 30%
+//rule "Battery Warning"
+//    salience 80
+//    when
+//        BatteryReading(level >= 20, level < 30)
+//        not(FlightFact(value == "BATTERY_CRITICAL"))
+//        not(FlightFact(value == "BATTERY_LOW"))
+//        not(FlightFact(value == "BATTERY_WARNING"))
+//    then
+//        insert(new FlightFact("BATTERY_WARNING"));
+//        insert(new FlightWarning("Baterija ispod 30%"));
+//        System.out.println("[RULE] Battery Warning: < 30%");
+//end

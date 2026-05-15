@@ -1,0 +1,42 @@
+package rules.level2;
+
+
+import com.ftn.sbnz.model.facts.FlightFact;
+import com.ftn.sbnz.model.facts.FlightWarning;
+
+// Risky flight: Low battery + weak signal
+rule "Flight Risky"
+    salience 80
+    when
+        FlightFact(value == "BATTERY_LOW")
+        FlightFact(value == "SIGNAL_WEAK")
+        not(FlightFact(value == "FLIGHT_RISKY"))
+    then
+        insert(new FlightFact("FLIGHT_RISKY"));
+        System.out.println("[RULE] Flight Risky: Low battery + weak signal");
+end
+
+// Unstable flight: Overspeed + poor GNSS
+rule "Flight Unstable - Overspeed and Poor GNSS"
+    salience 80
+    when
+        FlightFact(value == "OVERSPEED")
+        (FlightFact(value == "GNSS_POOR_HDOP") or FlightFact(value == "GNSS_FEW_SATS"))
+        not(FlightFact(value == "FLIGHT_UNSTABLE"))
+    then
+        insert(new FlightFact("FLIGHT_UNSTABLE"));
+        insert(new FlightWarning("Nestabilan let: brzina + slab GNSS"));
+        System.out.println("[RULE] Flight Unstable: Overspeed + Poor GNSS");
+end
+
+// Unreliable GNSS: Poor HDOP + few satellites
+rule "GNSS Unreliable"
+    salience 80
+    when
+        FlightFact(value == "GNSS_POOR_HDOP")
+        FlightFact(value == "GNSS_FEW_SATS")
+        not(FlightFact(value == "GNSS_UNRELIABLE"))
+    then
+        insert(new FlightFact("GNSS_UNRELIABLE"));
+        System.out.println("[RULE] GNSS Unreliable: Poor HDOP + Few Satellites");
+end

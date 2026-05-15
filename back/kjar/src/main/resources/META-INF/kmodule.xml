@@ -1,0 +1,14 @@
+<kmodule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://jboss.org/kie/6.0.0/kmodule">
+    <kbase name="uavKbase"
+           eventProcessingMode="stream"
+           packages="rules.level1, rules.level1.generated, rules.level2, rules.level3">
+        <ksession name="uavCepSession" type="stateful" clockType="realtime"/>
+    </kbase>
+
+    <!-- Optional: Stateless session for one-shot decisions -->
+    <kbase name="uavStatelessKbase"
+           eventProcessingMode="cloud"
+           packages="rules">
+        <ksession name="uavStatelessSession" type="stateless"/>
+    </kbase>
+</kmodule>

@@ -1,0 +1,30 @@
+template header
+className
+property
+operator
+threshold
+factName
+warningMessage
+salience
+
+package rules.level1.generated;
+
+import com.ftn.sbnz.model.events.*;
+import com.ftn.sbnz.model.facts.*;
+
+template "ThresholdRule"
+
+rule "Detect @{factName}"
+    salience @{salience}
+    when
+        $reading: @{className}Reading(
+            @{property} @{operator} @{threshold}
+        )
+        not(FlightFact(value == "@{factName}"))
+    then
+        insert(new FlightFact("@{factName}"));
+        insert(new FlightWarning("@{warningMessage}"));
+        System.out.println("[TEMPLATE RULE] @{factName}: @{warningMessage}");
+end
+
+end template

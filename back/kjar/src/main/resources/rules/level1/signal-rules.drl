@@ -1,0 +1,44 @@
+package rules.level1;
+
+import com.ftn.sbnz.model.events.SignalReading;
+import com.ftn.sbnz.model.facts.FlightFact;
+import com.ftn.sbnz.model.facts.FlightWarning;
+
+// Signal completely lost
+rule "Signal Lost"
+    salience 100
+    when
+        SignalReading(strength == 0)
+        not(FlightFact(value == "SIGNAL_LOST"))
+    then
+        insert(new FlightFact("SIGNAL_LOST"));
+        insert(new FlightWarning("Signal potpuno izgubljen"));
+        System.out.println("[RULE] Signal Lost: 0%");
+end
+
+// Weak signal
+rule "Signal Weak"
+    salience 90
+    when
+        SignalReading(strength > 0, strength < 25)
+        not(FlightFact(value == "SIGNAL_LOST"))
+        not(FlightFact(value == "SIGNAL_WEAK"))
+    then
+        insert(new FlightFact("SIGNAL_WEAK"));
+        insert(new FlightWarning("Slab signal"));
+        System.out.println("[RULE] Signal Weak: < 25%");
+end
+
+// Marginal signal
+rule "Signal Marginal"
+    salience 80
+    when
+        SignalReading(strength >= 25, strength < 50)
+        not(FlightFact(value == "SIGNAL_LOST"))
+        not(FlightFact(value == "SIGNAL_WEAK"))
+        not(FlightFact(value == "SIGNAL_MARGINAL"))
+    then
+        insert(new FlightFact("SIGNAL_MARGINAL"));
+        insert(new FlightWarning("Signal marginalan"));
+        System.out.println("[RULE] Signal Marginal: < 50%");
+end

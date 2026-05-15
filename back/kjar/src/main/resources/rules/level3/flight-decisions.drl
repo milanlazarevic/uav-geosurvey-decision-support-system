@@ -1,0 +1,146 @@
+package rules.level3;
+
+import com.ftn.sbnz.model.facts.FlightFact;
+import com.ftn.sbnz.model.decisions.FlightDecision;
+import com.ftn.sbnz.model.enums.FlightState;
+import com.ftn.sbnz.model.enums.Action
+
+// CRITICAL: Signal lost → LAND immediately
+rule "Decision: Signal Lost - Land"
+    salience 100
+    when
+        FlightFact(value == "SIGNAL_LOST")
+        not(FlightDecision(action == Action.LAND))
+    then
+        insert(new FlightDecision(
+            FlightState.CRITICAL,
+            Action.LAND,
+            "Signal potpuno izgubljen – hitno sletanje"
+        ));
+        System.out.println("[DECISION] CRITICAL: Signal Lost → LAND");
+end
+
+// CRITICAL: No GNSS fix → LAND
+rule "Decision: No GNSS Fix - Land"
+    salience 100
+    when
+        FlightFact(value == "GNSS_NO_FIX")
+        not(FlightDecision(action == Action.LAND))
+    then
+        insert(new FlightDecision(
+            FlightState.CRITICAL,
+            Action.LAND,
+            "Nema GNSS fixa – let nije siguran"
+        ));
+        System.out.println("[DECISION] CRITICAL: No GNSS Fix → LAND");
+end
+
+// CRITICAL: Battery critical + weak signal → RTH
+rule "Decision: Critical Battery and Weak Signal - RTH"
+    salience 95
+    when
+        FlightFact(value == "BATTERY_CRITICAL")
+        FlightFact(value == "SIGNAL_WEAK")
+        not(FlightDecision(state == FlightState.CRITICAL))
+    then
+        insert(new FlightDecision(
+            FlightState.CRITICAL,
+            Action.RETURN_TO_HOME,
+            "Kritična baterija uz slab signal – Return to Home"
+        ));
+        System.out.println("[DECISION] CRITICAL: Battery Critical + Weak Signal → RTH");
+end
+
+// CRITICAL: Rapid battery drain → RTH
+rule "Decision: Rapid Battery Drain - RTH"
+    salience 95
+    when
+        FlightFact(value == "BATTERY_DRAIN_RAPID")
+        not(FlightDecision())
+    then
+        insert(new FlightDecision(
+            FlightState.CRITICAL,
+            Action.RETURN_TO_HOME,
+            "Detektovan nagli pad baterije – Return to Home"
+        ));
+        System.out.println("[DECISION] CRITICAL: Rapid Battery Drain → RTH");
+end
+
+// WARNING: Risky flight → RTH
+rule "Decision: Risky Flight - RTH"
+    salience 70
+    when
+        FlightFact(value == "FLIGHT_RISKY")
+        not(FlightFact(value == "BATTERY_CRITICAL"))
+        not(FlightDecision(state == FlightState.CRITICAL))
+    then
+        insert(new FlightDecision(
+            FlightState.WARNING,
+            Action.RETURN_TO_HOME,
+            "Rizično stanje: baterija + signal"
+        ));
+        System.out.println("[DECISION] WARNING: Risky Flight → RTH");
+end
+
+// WARNING: Overspeed → SLOW_DOWN
+rule "Decision: Overspeed - Slow Down"
+    salience 70
+    when
+        FlightFact(value == "OVERSPEED")
+        not(FlightDecision(state == FlightState.CRITICAL))
+    then
+        insert(new FlightDecision(
+            FlightState.WARNING,
+            Action.SLOW_DOWN,
+            "Prekoračena brzina – usporiti"
+        ));
+        System.out.println("[DECISION] WARNING: Overspeed → SLOW_DOWN");
+end
+
+// WARNING: Unstable flight → SLOW_DOWN
+rule "Decision: Unstable Flight - Slow Down"
+    salience 70
+    when
+        FlightFact(value == "FLIGHT_UNSTABLE")
+        not(FlightDecision(state == FlightState.CRITICAL))
+    then
+        insert(new FlightDecision(
+            FlightState.WARNING,
+            Action.SLOW_DOWN,
+            "Nestabilan let – smanjiti brzinu"
+        ));
+        System.out.println("[DECISION] WARNING: Unstable Flight → SLOW_DOWN");
+end
+
+// WARNING: High warning frequency → RTH
+rule "Decision: High Warning Frequency - RTH"
+    salience 70
+    when
+        FlightFact(value == "HIGH_WARNING_FREQUENCY")
+        not(FlightDecision(state == FlightState.CRITICAL))
+    then
+        insert(new FlightDecision(
+            FlightState.WARNING,
+            Action.RETURN_TO_HOME,
+            "Visoka učestalost upozorenja u zadnja 2 minuta"
+        ));
+        System.out.println("[DECISION] WARNING: High Warning Frequency → RTH");
+end
+
+// SAFE: All parameters normal → CONTINUE
+rule "Decision: Safe Flight - Continue"
+    salience 50
+    when
+        not(FlightFact(value contains "CRITICAL"))
+        not(FlightFact(value == "SIGNAL_LOST"))
+        not(FlightFact(value == "FLIGHT_RISKY"))
+        not(FlightFact(value == "GNSS_UNRELIABLE"))
+        not(FlightDecision())
+    then
+        insert(new FlightDecision(
+            FlightState.SAFE,
+            Action.CONTINUE,
+            "Svi parametri u granicama – nastaviti misiju"
+        ));
+        System.out.println("[DECISION] SAFE: Continue Mission");
+end

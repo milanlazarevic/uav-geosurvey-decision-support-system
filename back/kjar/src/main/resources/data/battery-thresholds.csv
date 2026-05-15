@@ -1,0 +1,4 @@
+className,property,operator,threshold,factName,warningMessage,salience
+Battery,level,<,10,BATTERY_CRITICAL,Baterija ispod 10%,100
+Battery,level,<,20,BATTERY_LOW,Baterija ispod 20%,90
+Battery,level,<,30,BATTERY_WARNING,Baterija ispod 30%,80

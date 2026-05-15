@@ -1,0 +1,61 @@
+package rules.level2;
+
+import com.ftn.sbnz.model.events.BatteryReading
+import com.ftn.sbnz.model.events.SignalReading
+import com.ftn.sbnz.model.facts.FlightFact
+import com.ftn.sbnz.model.facts.FlightWarning
+
+
+// CEP Pattern 1: Rapid battery drain (>12% drop in 30 seconds)
+rule "Battery Drain Rapid"
+    salience 100
+    when
+        $e1: BatteryReading($lvl1: level, $t1: timestamp)
+        $e2: BatteryReading(
+            level < ($lvl1 - 12),
+            this after [0s, 30s] $e1
+        )
+        not(FlightFact(value == "BATTERY_DRAIN_RAPID"))
+    then
+        insert(new FlightFact("BATTERY_DRAIN_RAPID"));
+        insert(new FlightWarning(
+            "Nagli pad baterije: " + $lvl1 + "% → " + $e2.getLevel() + "% za 30s"
+        ));
+        System.out.println("[CEP] Rapid Battery Drain: " + $lvl1 + "% -> " + $e2.getLevel() + "%");
+end
+
+// CEP Pattern 2: High warning frequency (4+ warnings in 2 minutes)
+rule "High Warning Frequency"
+    salience 90
+    when
+        accumulate(
+            FlightWarning() over window:time(120s),
+            $count: count(1)
+        )
+        eval($count >= 4)
+        not(FlightFact(value == "HIGH_WARNING_FREQUENCY"))
+    then
+        insert(new FlightFact("HIGH_WARNING_FREQUENCY"));
+        System.out.println("[CEP] High Warning Frequency: " + $count + " warnings in 2 minutes");
+end
+
+// CEP Pattern 3: Signal continuously degrading (3 consecutive drops in 60s)
+rule "Signal Degrading"
+    salience 90
+    when
+        $s1: SignalReading($str1: strength, $t1: timestamp)
+        $s2: SignalReading(
+            strength < $str1,
+            this after [0s, 30s] $s1,
+            $str2: strength
+        )
+        $s3: SignalReading(
+            strength < $str2,
+            this after [0s, 30s] $s2
+        )
+        not(FlightFact(value == "SIGNAL_DEGRADING"))
+    then
+        insert(new FlightFact("SIGNAL_DEGRADING"));
+        insert(new FlightWarning("Signal kontinuirano opada"));
+        System.out.println("[CEP] Signal Degrading: " + $str1 + "% -> " + $str2 + "% -> " + $s3.getStrength() + "%");
+end

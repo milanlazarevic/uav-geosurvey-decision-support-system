@@ -1,0 +1,42 @@
+//package rules.level1;
+//
+//import com.ftn.sbnz.model.events.GnssReading;
+//import com.ftn.sbnz.model.facts.FlightFact;
+//import com.ftn.sbnz.model.facts.FlightWarning;
+//import com.ftn.sbnz.model.enums.FixType;
+//
+//// No GNSS fix
+//rule "GNSS No Fix"
+//    salience 100
+//    when
+//        GnssReading(fixType == FixType.NONE)
+//        not(FlightFact(value == "GNSS_NO_FIX"))
+//    then
+//        insert(new FlightFact("GNSS_NO_FIX"));
+//        insert(new FlightWarning("Nema GNSS fixa"));
+//        System.out.println("[RULE] GNSS No Fix");
+//end
+//
+//// Poor HDOP (Horizontal Dilution of Precision)
+//rule "GNSS Poor HDOP"
+//    salience 90
+//    when
+//        $gnss : GnssReading(hdop > 5.0)
+//        not(FlightFact(value == "GNSS_POOR_HDOP"))
+//    then
+//        insert(new FlightFact("GNSS_POOR_HDOP"));
+//        insert(new FlightWarning("HDOP > 5, pozicija nepouzdana"));
+//        System.out.println("[RULE] GNSS Poor HDOP: " + $gnss.getHdop());
+//end
+//
+//// Too few satellites
+//rule "GNSS Few Satellites"
+//    salience 90
+//    when
+//        $gnss: GnssReading(satellites < 4)
+//        not(FlightFact(value == "GNSS_FEW_SATS"))
+//    then
+//        insert(new FlightFact("GNSS_FEW_SATS"));
+//        insert(new FlightWarning("Premalo satelita (< 4)"));
+//        System.out.println("[RULE] GNSS Few Satellites: " + $gnss.getSatellites());
+//end

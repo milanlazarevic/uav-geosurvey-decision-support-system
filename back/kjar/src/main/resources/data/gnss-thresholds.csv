@@ -1,0 +1,4 @@
+className,property,operator,threshold,factName,warningMessage,salience
+Gnss,hdop,>,5.0,GNSS_POOR_HDOP,HDOP > 5 pozicija nepouzdana,100
+Gnss,satellites,<,4,GNSS_FEW_SATS,Premalo satelita,90
+Gnss,satellites,<,6,GNSS_MARGINAL_SATS,Marginalan broj satelita,80

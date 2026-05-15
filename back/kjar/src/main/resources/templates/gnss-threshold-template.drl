@@ -1,0 +1,7 @@
+package templates;
+dialect  "mvel"
+
+rule "threshold-template"
+    when
+    then
+end

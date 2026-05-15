@@ -1,0 +1,17 @@
+package rules.level1;
+
+import com.ftn.sbnz.model.events.SpeedReading;
+import com.ftn.sbnz.model.facts.FlightFact;
+import com.ftn.sbnz.model.facts.FlightWarning;
+
+// Overspeed
+rule "Overspeed"
+    salience 90
+    when
+        $speed: SpeedReading(speed > 15)
+        not(FlightFact(value == "OVERSPEED"))
+    then
+        insert(new FlightFact("OVERSPEED"));
+        insert(new FlightWarning("Prekoračena maksimalna brzina"));
+        System.out.println("[RULE] Overspeed: " + $speed.getSpeed() + " m/s");
+end
